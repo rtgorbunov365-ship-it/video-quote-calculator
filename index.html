@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,50 +12,99 @@
     @media print { .no-print { display: none !important; } body { background: white !important; color: black !important; } .bg-card { background: white !important; border: 1px solid #e2e8f0 !important; } .text-accent { color: #0891b2 !important; } .bg-accent { background: #0891b2 !important; } }
   </style>
 </head>
-<body class="bg-bg text-white min-h-screen flex items-center justify-center p-4">
+<body class="bg-bg text-white min-h-screen flex flex-col items-center justify-center p-4">
+  <div class="w-full max-w-4xl flex justify-end mb-4 no-print">
+    <select id="langSelect" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm focus:border-accent focus:outline-none text-white" aria-label="Language"></select>
+  </div>
   <div class="w-full max-w-4xl grid md:grid-cols-[1fr_320px] gap-6">
     <div class="bg-card rounded-2xl p-6 space-y-5">
-      <h1 class="text-2xl font-bold tracking-tight">Video Editor Quote Generator</h1>
+      <h1 id="title" class="text-2xl font-bold tracking-tight">Video Editor Quote Generator</h1>
       <div class="grid sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm text-slate-400 mb-1">Тип видео</label>
-          <select id="type" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 focus:border-accent focus:outline-none">
-            <option value="youtube" data-mult="1">YouTube выпуск (×1.0)</option>
-            <option value="reels" data-mult="1.2">Reels / TikTok / Shorts (×1.2)</option>
-            <option value="ad" data-mult="1.5">Рекламный ролик (×1.5)</option>
-          </select>
+          <label id="labelType" class="block text-sm text-slate-400 mb-1">Video Type</label>
+          <select id="type" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 focus:border-accent focus:outline-none"></select>
         </div>
         <div>
-          <label class="block text-sm text-slate-400 mb-1">Базовая ставка за минуту ($)</label>
+          <label id="labelRate" class="block text-sm text-slate-400 mb-1">Base Rate per Minute ($)</label>
           <input id="rate" type="number" value="30" min="1" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 focus:border-accent focus:outline-none">
         </div>
       </div>
       <div>
-        <label class="block text-sm text-slate-400 mb-1">Длительность: <span id="durVal" class="text-accent">1</span> мин</label>
+        <label id="labelDuration" class="block text-sm text-slate-400 mb-1">Duration: <span id="durVal" class="text-accent">1</span> min</label>
         <input id="duration" type="range" min="1" max="60" value="1" class="w-full h-2 bg-slate-700 rounded-lg appearance-none accent-accent">
       </div>
       <fieldset class="space-y-3 pt-2 border-t border-slate-800">
-        <legend class="text-sm font-medium text-slate-300">Доп. услуги</legend>
-        <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="subs" value="20" class="w-4 h-4 accent-accent rounded border-slate-600"><span>Динамические субтитры (+$20)</span></label>
-        <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="sound" value="25" class="w-4 h-4 accent-accent rounded border-slate-600"><span>Саунд-дизайн и подбор музыки (+$25)</span></label>
-        <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="rush" class="w-4 h-4 accent-accent rounded border-slate-600"><span>Срочный заказ за 24ч (+35% к итогу)</span></label>
+        <legend id="legendAddons" class="text-sm font-medium text-slate-300">Add-ons</legend>
+        <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="subs" value="20" class="w-4 h-4 accent-accent rounded border-slate-600"><span id="lblSubs">Dynamic Subtitles (+$20)</span></label>
+        <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="sound" value="25" class="w-4 h-4 accent-accent rounded border-slate-600"><span id="lblSound">Sound Design & Music (+$25)</span></label>
+        <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="rush" class="w-4 h-4 accent-accent rounded border-slate-600"><span id="lblRush">Rush Order 24h (+35% to total)</span></label>
       </fieldset>
     </div>
 
     <div class="bg-card rounded-2xl p-6 sticky top-4 h-fit">
-      <h2 class="text-lg font-semibold mb-4">Итоговая смета</h2>
+      <h2 id="titleQuote" class="text-lg font-semibold mb-4">Quote Summary</h2>
       <div id="breakdown" class="space-y-2 text-sm text-slate-300 mb-4"></div>
       <div class="border-t border-slate-700 pt-3 mb-4">
-        <div class="flex justify-between text-lg font-bold"><span>Итого:</span><span id="total" class="text-accent">$30</span></div>
+        <div class="flex justify-between text-lg font-bold"><span id="labelTotal">Total:</span><span id="total" class="text-accent">$30</span></div>
       </div>
-      <button id="copyBtn" class="w-full bg-accent text-bg font-semibold py-3 rounded-lg hover:opacity-90 transition no-print">Скопировать смету</button>
-      <p id="toast" class="text-center text-xs text-green-400 mt-2 hidden">Скопировано!</p>
+      <button id="copyBtn" class="w-full bg-accent text-bg font-semibold py-3 rounded-lg hover:opacity-90 transition no-print">Copy Quote</button>
+      <p id="toast" class="text-center text-xs text-green-400 mt-2 hidden">Copied!</p>
     </div>
   </div>
 
   <script>
     const $ = (id) => document.getElementById(id);
     const fmt = (n) => '$' + n.toLocaleString();
+
+    const i18n = {
+      en: { title: 'Video Editor Quote Generator', labelType: 'Video Type', labelRate: 'Base Rate per Minute ($)', labelDuration: 'Duration:', unitMin: 'min', legendAddons: 'Add-ons', lblSubs: 'Dynamic Subtitles (+$20)', lblSound: 'Sound Design & Music (+$25)', lblRush: 'Rush Order 24h (+35% to total)', titleQuote: 'Quote Summary', labelTotal: 'Total:', copyBtn: 'Copy Quote', toast: 'Copied!', typeYT: 'YouTube Video (×1.0)', typeReels: 'Reels / TikTok / Shorts (×1.2)', typeAd: 'Commercial Ad (×1.5)', baseLabel: 'Base', subsLabel: 'Subtitles', soundLabel: 'Sound Design', rushLabel: 'Rush', quoteTitle: 'VIDEO EDITING QUOTE', quoteFooter: 'Price includes 2 revision rounds. Each additional round at standard rate.' },
+      es: { title: 'Generador de Presupuestos para Editor de Video', labelType: 'Tipo de Video', labelRate: 'Tarifa Base por Minuto ($)', labelDuration: 'Duración:', unitMin: 'min', legendAddons: 'Extras', lblSubs: 'Subtítulos Dinámicos (+$20)', lblSound: 'Diseño de Sonido y Música (+$25)', lblRush: 'Urgente 24h (+35% al total)', titleQuote: 'Resumen del Presupuesto', labelTotal: 'Total:', copyBtn: 'Copiar Presupuesto', toast: '¡Copiado!', typeYT: 'Video YouTube (×1.0)', typeReels: 'Reels / TikTok / Shorts (×1.2)', typeAd: 'Anuncio Comercial (×1.5)', baseLabel: 'Base', subsLabel: 'Subtítulos', soundLabel: 'Diseño Sonido', rushLabel: 'Urgente', quoteTitle: 'PRESUPUESTO EDICIÓN VIDEO', quoteFooter: 'El precio incluye 2 rondas de revisiones. Cada ronda adicional a tarifa estándar.' },
+      fr: { title: 'Générateur de Devis Monteur Vidéo', labelType: 'Type de Vidéo', labelRate: 'Tarif de Base par Minute ($)', labelDuration: 'Durée :', unitMin: 'min', legendAddons: 'Options', lblSubs: 'Sous-titres Dynamiques (+20$)', lblSound: 'Sound Design & Musique (+25$)', lblRush: 'Commande Urgente 24h (+35% au total)', titleQuote: 'Résumé du Devis', labelTotal: 'Total :', copyBtn: 'Copier le Devis', toast: 'Copié !', typeYT: 'Vidéo YouTube (×1.0)', typeReels: 'Reels / TikTok / Shorts (×1.2)', typeAd: 'Publicité Commerciale (×1.5)', baseLabel: 'Base', subsLabel: 'Sous-titres', soundLabel: 'Sound Design', rushLabel: 'Urgent', quoteTitle: 'DEVIS MONTAGE VIDÉO', quoteFooter: 'Le prix inclut 2 rounds de révisions. Chaque round supplémentaire au tarif standard.' },
+      de: { title: 'Video Editor Angebot Generator', labelType: 'Video-Typ', labelRate: 'Basispreis pro Minute ($)', labelDuration: 'Dauer:', unitMin: 'Min', legendAddons: 'Zusatzleistungen', lblSubs: 'Dynamische Untertitel (+20$)', lblSound: 'Sound Design & Musik (+25$)', lblRush: 'Express-Auftrag 24h (+35% auf Gesamt)', titleQuote: 'Angebotsübersicht', labelTotal: 'Gesamt:', copyBtn: 'Angebot Kopieren', toast: 'Kopiert!', typeYT: 'YouTube Video (×1.0)', typeReels: 'Reels / TikTok / Shorts (×1.2)', typeAd: 'Werbevideo (×1.5)', baseLabel: 'Basis', subsLabel: 'Untertitel', soundLabel: 'Sound Design', rushLabel: 'Express', quoteTitle: 'VIDEO BEARBEITUNGS ANGEBOT', quoteFooter: 'Im Preis sind 2 Korrekturrunden enthalten. Jede weitere Runde zum Standardtarif.' },
+      it: { title: 'Generatore Preventivi Editor Video', labelType: 'Tipo Video', labelRate: 'Tariffa Base al Minuto ($)', labelDuration: 'Durata:', unitMin: 'min', legendAddons: 'Extra', lblSubs: 'Sottotitoli Dinamici (+20$)', lblSound: 'Sound Design e Musica (+25$)', lblRush: 'Ordine Urgente 24h (+35% sul totale)', titleQuote: 'Riepilogo Preventivo', labelTotal: 'Totale:', copyBtn: 'Copia Preventivo', toast: 'Copiato!', typeYT: 'Video YouTube (×1.0)', typeReels: 'Reels / TikTok / Shorts (×1.2)', typeAd: 'Spot Pubblicitario (×1.5)', baseLabel: 'Base', subsLabel: 'Sottotitoli', soundLabel: 'Sound Design', rushLabel: 'Urgente', quoteTitle: 'PREVENTIVO MONTAGGIO VIDEO', quoteFooter: 'Il prezzo include 2 round di revisioni. Ogni round aggiuntivo a tariffa standard.' },
+      pt: { title: 'Gerador de Orçamentos para Editor de Vídeo', labelType: 'Tipo de Vídeo', labelRate: 'Taxa Base por Minuto ($)', labelDuration: 'Duração:', unitMin: 'min', legendAddons: 'Extras', lblSubs: 'Legendas Dinâmicas (+$20)', lblSound: 'Sound Design e Música (+$25)', lblRush: 'Pedido Urgente 24h (+35% no total)', titleQuote: 'Resumo do Orçamento', labelTotal: 'Total:', copyBtn: 'Copiar Orçamento', toast: 'Copiado!', typeYT: 'Vídeo YouTube (×1.0)', typeReels: 'Reels / TikTok / Shorts (×1.2)', typeAd: 'Comercial (×1.5)', baseLabel: 'Base', subsLabel: 'Legendas', soundLabel: 'Sound Design', rushLabel: 'Urgente', quoteTitle: 'ORÇAMENTO EDIÇÃO VÍDEO', quoteFooter: 'O preço inclui 2 rodadas de revisão. Cada rodada adicional à taxa padrão.' },
+      ru: { title: 'Генератор смет для видеомонтажера', labelType: 'Тип видео', labelRate: 'Базовая ставка за минуту ($)', labelDuration: 'Длительность:', unitMin: 'мин', legendAddons: 'Доп. услуги', lblSubs: 'Динамические субтитры (+$20)', lblSound: 'Саунд-дизайн и подбор музыки (+$25)', lblRush: 'Срочный заказ за 24ч (+35% к итогу)', titleQuote: 'Итоговая смета', labelTotal: 'Итого:', copyBtn: 'Скопировать смету', toast: 'Скопировано!', typeYT: 'YouTube выпуск (×1.0)', typeReels: 'Reels / TikTok / Shorts (×1.2)', typeAd: 'Рекламный ролик (×1.5)', baseLabel: 'База', subsLabel: 'Субтитры', soundLabel: 'Саунд-дизайн', rushLabel: 'Срочность', quoteTitle: 'СМЕТА НА ВИДЕОМОНТАЖ', quoteFooter: 'В стоимость включены 2 раунда правок. Каждый дополнительный — по тарифу.' }
+    };
+
+    let currentLang = localStorage.getItem('lang') || 'en';
+    const langSelect = $('langSelect');
+    Object.entries({ en: 'EN', es: 'ES', fr: 'FR', de: 'DE', it: 'IT', pt: 'PT', ru: 'RU' }).forEach(([code, label]) => {
+      const opt = document.createElement('option');
+      opt.value = code; opt.textContent = label;
+      if (code === currentLang) opt.selected = true;
+      langSelect.appendChild(opt);
+    });
+
+    function applyLang(lang) {
+      const t = i18n[lang];
+      document.documentElement.lang = lang;
+      document.title = t.title;
+      $('title').textContent = t.title;
+      $('labelType').textContent = t.labelType;
+      $('labelRate').textContent = t.labelRate;
+      $('labelDuration').innerHTML = t.labelDuration + ' <span id="durVal" class="text-accent">1</span> ' + t.unitMin;
+      $('legendAddons').textContent = t.legendAddons;
+      $('lblSubs').textContent = t.lblSubs;
+      $('lblSound').textContent = t.lblSound;
+      $('lblRush').textContent = t.lblRush;
+      $('titleQuote').textContent = t.titleQuote;
+      $('labelTotal').textContent = t.labelTotal;
+      $('copyBtn').textContent = t.copyBtn;
+      $('toast').textContent = t.toast;
+
+      $('type').innerHTML = `
+        <option value="youtube" data-mult="1">${t.typeYT}</option>
+        <option value="reels" data-mult="1.2">${t.typeReels}</option>
+        <option value="ad" data-mult="1.5">${t.typeAd}</option>
+      `;
+    }
+
+    langSelect.addEventListener('change', e => {
+      currentLang = e.target.value;
+      localStorage.setItem('lang', currentLang);
+      applyLang(currentLang);
+      calc();
+    });
 
     function calc() {
       const rate = +$('rate').value || 30;
@@ -65,29 +114,34 @@
       let base = rate * dur * mult;
       let addons = 0;
       const lines = [];
+      const t = i18n[currentLang];
 
-      lines.push(`База: ${dur} мин × $${rate} × ${mult} = ${fmt(base)}`);
-      if ($('subs').checked) { addons += 20; lines.push('Субтитры: +$20'); }
-      if ($('sound').checked) { addons += 25; lines.push('Саунд-дизайн: +$25'); }
+      lines.push(`${t.baseLabel}: ${dur} ${t.unitMin} × $${rate} × ${mult} = ${fmt(base)}`);
+      if ($('subs').checked) { addons += 20; lines.push(`${t.subsLabel}: +$20`); }
+      if ($('sound').checked) { addons += 25; lines.push(`${t.soundLabel}: +$25`); }
       let subtotal = base + addons;
-      if ($('rush').checked) { const rush = Math.round(subtotal * 0.35); subtotal += rush; lines.push(`Срочность (+35%): +${fmt(rush)}`); }
+      if ($('rush').checked) { const rush = Math.round(subtotal * 0.35); subtotal += rush; lines.push(`${t.rushLabel} (+35%): +${fmt(rush)}`); }
 
       $('breakdown').innerHTML = lines.map(l => `<div class="flex justify-between"><span>${l.split(':')[0]}</span><span>${l.includes('=') ? l.split('=')[1].trim() : '+' + l.split('+')[1]}</span></div>`).join('');
       $('total').textContent = fmt(subtotal);
-      return { base, addons, subtotal, lines };
+      return { base, addons, subtotal, lines, t };
     }
 
     function copy() {
-      const { lines, subtotal } = calc();
-      const text = `СМЕТА НА ВИДЕОМОНТАЖ\n\n${lines.join('\n')}\n\nИТОГО: ${fmt(subtotal)}\n\nВ стоимость включены 2 раунда правок. Каждый дополнительный — по тарифу.`;
+      const { lines, subtotal, t } = calc();
+      const text = `${t.quoteTitle}\n\n${lines.join('\n')}\n\n${t.labelTotal} ${fmt(subtotal)}\n\n${t.quoteFooter}`;
       navigator.clipboard.writeText(text);
-      const t = $('toast'); t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 1500);
+      const toast = $('toast');
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 1500);
     }
 
     ['type','rate','duration','subs','sound','rush'].forEach(id => $(id).addEventListener('input', calc));
     $('rate').addEventListener('input', () => localStorage.setItem('rate', $('rate').value));
     $('rate').value = localStorage.getItem('rate') || 30;
     $('copyBtn').addEventListener('click', copy);
+
+    applyLang(currentLang);
     calc();
   </script>
 </body>
